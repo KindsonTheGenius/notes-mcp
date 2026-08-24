@@ -1,8 +1,10 @@
 from mcp.server.mcpserver import MCPServer
 import json
 import httpx as httpx
-
+from rag import retrieve
 from pathlib import Path
+
+from fetch_page import fetch_page as load_page
 
 NOTES_PATH = Path(__file__).parent / "notes.json"
 
@@ -72,6 +74,20 @@ def notes_resource() -> str:
 @mcp.prompt()
 def plan_my_day(city: str) -> str:
     return f"Plan my day in {city}. Use get_weather + notes://all..."
+
+@mcp.tool()
+def search_docs(query: str, top_k: int = 3) -> str:
+    try:
+        return retrieve(query, top_k)
+    except Exception as e:
+        return f"Error searching docs: {str(e)}"
+
+@mcp.tool()
+def fetch_page(url: str) -> str:
+    try:
+        return load_page(url)
+    except Exception as e:
+        return f"Error fetching page: {str(e)}"
 
 
 if __name__ == "__main__":
